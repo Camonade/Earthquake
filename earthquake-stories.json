@@ -1,0 +1,188 @@
+[
+  {
+    "id": "wenchuan_2008",
+    "title": "2008年汶川地震",
+    "description": "中国四川省汶川县发生的特大地震，造成重大人员伤亡和财产损失",
+    "duration": 180,
+    "events": [
+      {
+        "time": 0,
+        "title": "地震前兆",
+        "description": "2008年5月12日凌晨，四川省汶川县发生里氏8.0级强烈地震。此次地震是唐山大地震以来破坏性最强、波及范围最广、救灾难度最大的一次地震。",
+        "image": "https://example.com/wenchuan-before.jpg",
+        "position": [103.364, 31.002],
+        "magnitude": 8.0,
+        "type": "mainshock"
+      },
+      {
+        "time": 30,
+        "title": "主震发生",
+        "description": "地震发生在北京时间5月12日14时28分04.1秒，震源深度约14公里。地震波及中国大部分地区及亚洲多个国家。",
+        "image": "https://example.com/wenchuan-main.jpg",
+        "position": [103.364, 31.002],
+        "magnitude": 8.0,
+        "type": "mainshock"
+      },
+      {
+        "time": 60,
+        "title": "余震序列",
+        "description": "主震后发生大量余震，其中5.4级以上余震就有8次，最大余震为5月25日的6.4级地震。",
+        "image": "https://example.com/wenchuan-aftershocks.jpg",
+        "position": [103.364, 31.002],
+        "magnitude": 6.4,
+        "type": "aftershock"
+      },
+      {
+        "time": 90,
+        "title": "救援行动",
+        "description": "地震发生后，中国政府迅速组织大规模救援行动，解放军、武警部队、医疗队等迅速赶赴灾区。",
+        "image": "https://example.com/wenchuan-rescue.jpg",
+        "position": [103.364, 31.002],
+        "magnitude": null,
+        "type": "rescue"
+      },
+      {
+        "time": 120,
+        "title": "灾区重建",
+        "description": "在党中央领导下，灾区开展了大规模重建工作，建设了更加安全、现代的新家园。",
+        "image": "https://example.com/wenchuan-rebuild.jpg",
+        "position": [103.364, 31.002],
+        "magnitude": null,
+        "type": "rebuild"
+      },
+      {
+        "time": 150,
+        "title": "地震记忆",
+        "description": "汶川地震让我们更加重视防灾减灾工作，提高了全社会的地震安全意识。",
+        "image": "https://example.com/wenchuan-memory.jpg",
+        "position": [103.364, 31.002],
+        "magnitude": null,
+        "type": "memory"
+      }
+    ]
+  },
+  {
+    "id": "tangshan_1976",
+    "title": "1976年唐山地震",
+    "description": "河北省唐山市发生的毁灭性地震，新中国成立以来伤亡最严重的地震",
+    "duration": 150,
+    "events": [
+      {
+        "time": 0,
+        "title": "地震背景",
+        "description": "1976年7月28日凌晨，唐山市发生里氏7.8级强烈地震。此次地震造成24万人死亡，16万人重伤。",
+        "image": "https://example.com/tangshan-before.jpg",
+        "position": [118.180, 39.630],
+        "magnitude": 7.8,
+        "type": "mainshock"
+      },
+      {
+        "time": 25,
+        "title": "凌晨主震",
+        "description": "地震发生在凌晨3时42分，持续约23秒。唐山这座百万人口的工业城市几乎被夷为平地。",
+        "image": "https://example.com/tangshan-main.jpg",
+        "position": [118.180, 39.630],
+        "magnitude": 7.8,
+        "type": "mainshock"
+      },
+      {
+        "time": 50,
+        "title": "天津余震",
+        "description": "主震后11分钟，天津市宁河县发生6.2级余震，造成天津地区严重损失。",
+        "image": "https://example.com/tangshan-tianjin.jpg",
+        "position": [117.200, 39.130],
+        "magnitude": 6.2,
+        "type": "aftershock"
+      },
+      {
+        "time": 75,
+        "title": "全国支援",
+        "description": "地震发生后，全国各地迅速组织支援，医疗队、物资、重建力量源源不断开赴灾区。",
+        "image": "https://example.com/tangshan-support.jpg",
+        "position": [118.180, 39.630],
+        "magnitude": null,
+        "type": "rescue"
+      },
+      {
+        "time": 100,
+        "title": "英雄城市",
+        "description": "唐山人民在废墟中重建家园，展现了顽强的生命力和不屈的精神。",
+        "image": "https://example.com/tangshan-rebuild.jpg",
+        "position": [118.180, 39.630],
+        "magnitude": null,
+        "type": "rebuild"
+      },
+      {
+        "time": 125,
+        "title": "地震科学",
+        "description": "唐山地震促进了中国地震科学的快速发展，建立了全国地震监测网络。",
+        "image": "https://example.com/tangshan-science.jpg",
+        "position": [118.180, 39.630],
+        "magnitude": null,
+        "type": "science"
+      }
+    ]
+  },
+  {
+    "id": "toho_2011",
+    "title": "2011年东日本大地震",
+    "description": "日本东北部海域发生的超大规模地震，引发海啸和福岛核事故",
+    "duration": 200,
+    "events": [
+      {
+        "time": 0,
+        "title": "地震前兆",
+        "description": "2011年3月11日，日本东北部海域发生里氏9.0级超大规模地震，是日本有观测记录以来规模最大的地震。",
+        "image": "https://example.com/tohoku-before.jpg",
+        "position": [142.369, 38.322],
+        "magnitude": 9.0,
+        "type": "mainshock"
+      },
+      {
+        "time": 40,
+        "title": "巨大海啸",
+        "description": "地震引发大规模海啸，波及日本太平洋沿岸地区，最大浪高达40米以上。",
+        "image": "https://example.com/tohoku-tsunami.jpg",
+        "position": [142.369, 38.322],
+        "magnitude": 9.0,
+        "type": "tsunami"
+      },
+      {
+        "time": 80,
+        "title": "福岛核事故",
+        "description": "海啸导致福岛第一核电站发生严重核事故，是切尔诺贝利事故以来最严重的核事故。",
+        "image": "https://example.com/tohoku-fukushima.jpg",
+        "position": [141.033, 37.421],
+        "magnitude": null,
+        "type": "nuclear"
+      },
+      {
+        "time": 120,
+        "title": "国际救援",
+        "description": "国际社会迅速提供援助，日本政府和人民共同应对这场灾难。",
+        "image": "https://example.com/tohoku-international.jpg",
+        "position": [142.369, 38.322],
+        "magnitude": null,
+        "type": "rescue"
+      },
+      {
+        "time": 160,
+        "title": "灾后重建",
+        "description": "日本在地震、海啸和核事故的多重打击下，开展了大规模重建工作。",
+        "image": "https://example.com/tohoku-rebuild.jpg",
+        "position": [142.369, 38.322],
+        "magnitude": null,
+        "type": "rebuild"
+      },
+      {
+        "time": 190,
+        "title": "防灾启示",
+        "description": "东日本大地震为全球防灾减灾提供了重要经验和教训。",
+        "image": "https://example.com/tohoku-lessons.jpg",
+        "position": [142.369, 38.322],
+        "magnitude": null,
+        "type": "lessons"
+      }
+    ]
+  }
+]
