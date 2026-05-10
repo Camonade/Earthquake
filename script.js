@@ -188,11 +188,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
         function focusGlobeOnCoord(lat, lon) {
             if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
-            const target = latLonToVector3(lat, lon, 1);
-            const distance = Math.max(2.4, camera.position.distanceTo(controls.target));
-            controls.target.copy(target);
-            camera.position.copy(target.clone().normalize().multiplyScalar(distance));
-            camera.lookAt(target);
+            const epicenterDir = latLonToVector3(lat, lon, 1).normalize();
+            const distance = Math.max(2.4, camera.position.length());
+            controls.target.set(0, 0, 0);
+            camera.position.copy(epicenterDir.multiplyScalar(distance));
+            camera.lookAt(controls.target);
             controls.update();
         }
       
