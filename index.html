@@ -51,6 +51,19 @@
             color: #333333;
             border: 1px solid rgba(0, 0, 0, 0.1);
         }
+        .quake-page-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin: -4px 0 0;
+            color: #1a1a1a;
+            white-space: nowrap;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
         .subpage-content {
             max-width: 1400px;
             margin: 20px auto 48px;
@@ -70,6 +83,8 @@
             margin: 12px 0 14px;
             display: flex;
             gap: 10px;
+            align-items: center;
+            position: relative;
         }
         .sub-switch-btn {
             border: 1px solid rgba(60, 82, 128, 0.22);
@@ -377,9 +392,12 @@
             color: #2d3a53;
         }
         .back-home-wrap {
-            margin-top: 24px;
+            margin-top: 10px;
             display: flex;
             justify-content: center;
+        }
+        .quake-back-home-wrap {
+            margin-top: 2px;
         }
         .maps-container {
             display: grid;
@@ -1925,6 +1943,7 @@
         <div class="earthquake-sub-switch">
             <button type="button" class="sub-switch-btn active" data-earthquake-subview="map">地图视图</button>
             <button type="button" class="sub-switch-btn" data-earthquake-subview="calendar">日历视图</button>
+            <div class="quake-page-title">地痕·震例库</div>
         </div>
         <div id="earthquake-map-host"></div>
         <div id="earthquake-calendar-host" style="display:none;"></div>
@@ -1999,9 +2018,6 @@
     </div>
 
     <div id="earthquake-view" class="subpage-content" style="display:none;">
-    <div class="header">
-        <h1>地震实例</h1>
-    </div>
     <div class="maps-container">
         <div class="globe-box" id="globeContainer">
             <div class="map-label">🌐 3D 球形地球 (动态日照·真实昼夜)</div>
@@ -2188,7 +2204,7 @@
             </div>
         </div>
 
-        <div class="back-home-wrap">
+        <div class="back-home-wrap quake-back-home-wrap">
             <button class="filter-btn filter-btn-reset back-home-btn" data-home-target="home-view">返回首页</button>
         </div>
     </div>
