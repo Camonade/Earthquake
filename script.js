@@ -760,34 +760,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             return `<span class="magnitude-chip ${level}"><span class="magnitude-dot"></span>M${Number(mag || 0).toFixed(1)}</span>`;
         }
 
-        async function copyPlace(event, index) {
-            event?.stopPropagation?.();
-            const quake = window.currentEarthquakeData?.[index];
-            const place = quake?.properties?.place || '未知地点';
-            try {
-                await navigator.clipboard.writeText(place);
-                setFilterMessage(`已复制地点：${place}`, 'success');
-            } catch (error) {
-                setFilterMessage('复制失败，请手动复制', 'error');
-            }
-        }
-
-        function locateQuake(event, index) {
-            event?.stopPropagation?.();
-            const quake = window.currentEarthquakeData?.[index];
-            if (!quake) return;
-            selectedQuakeKey = getQuakeStableKey(quake, index);
-            const coords = quake.geometry?.coordinates || [0, 0];
-            focusGlobeOnCoord(Number(coords[1]), Number(coords[0]));
-            applyCurrentView();
-            const mapWrap = document.querySelector('.maps-container');
-            if (mapWrap) {
-                mapWrap.classList.add('is-focusing');
-                mapWrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                setTimeout(() => mapWrap.classList.remove('is-focusing'), 1200);
-            }
-            showQuakeDetail(index);
-        }
 
         async function displayEarthquakes(data) {
             let quakes = data.features;

@@ -35,22 +35,6 @@
             letter-spacing: 1px;
             color: #1a1a1a;
         }
-        .subtitle {
-            color: #666666;
-            font-size: 14px;
-        }
-        .time-info {
-            margin-top: 8px;
-            font-size: 13px;
-            background: rgba(0, 0, 0, 0.08);
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 24px;
-            backdrop-filter: blur(4px);
-            font-family: monospace;
-            color: #333333;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
         .quake-page-title {
             text-align: center;
             font-size: 32px;
@@ -397,7 +381,8 @@
             justify-content: center;
         }
         .quake-back-home-wrap {
-            margin-top: 2px;
+            margin-top: -6px;
+            transform: translateY(-10px);
         }
         .maps-container {
             display: grid;
@@ -1632,12 +1617,6 @@
             background: rgba(79, 70, 229, 0.1) !important;
         }
 
-        .quake-table th:nth-child(5),
-        .quake-table td:nth-child(5) {
-            text-align: center;
-            width: 168px;
-        }
-
         .magnitude-chip {
             display: inline-flex;
             align-items: center;
@@ -1667,36 +1646,6 @@
             color: var(--text-sub);
             font-size: 12px;
             white-space: nowrap;
-        }
-
-        .row-actions {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            flex-wrap: nowrap;
-            min-width: 148px;
-        }
-
-        .action-icon {
-            margin: 0;
-            border: 1px solid rgba(120, 130, 152, 0.28);
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 8px;
-            width: auto;
-            min-width: 62px;
-            height: 28px;
-            padding: 0 8px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.2s;
-        }
-
-        .action-icon:hover {
-            border-color: var(--primary);
-            background: var(--primary-soft);
         }
 
         .skeleton-row td {
@@ -1869,12 +1818,6 @@
             .quake-table td.place {
                 white-space: normal;
                 text-align: left !important;
-            }
-
-            .row-actions {
-                justify-content: flex-end;
-                gap: 8px;
-                min-width: 0;
             }
 
             .table-state {
