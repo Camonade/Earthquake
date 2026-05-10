@@ -382,18 +382,30 @@
             justify-content: center;
         }
         .maps-container {
-            display: flex;
-            height: 500px;
+            display: grid;
+            grid-template-columns: 45% 55%;
+            gap: 16px;
+            height: 640px;
             border-bottom: 2px solid #e0e0e0;
             background: #f0f0f0;
+            padding: 16px;
         }
-        .globe-box, .mercator-box {
-            flex: 1;
+        .globe-box {
             position: relative;
             background: #f9f9f9;
+            height: 100%;
+            border-radius: 16px;
+            overflow: hidden;
         }
-        .mercator-box {
-            background: #f0f5ff;
+        .earthquake-layout-right {
+            display: grid;
+            grid-template-rows: auto auto 1fr;
+            gap: 12px;
+            height: 100%;
+            min-height: 0;
+        }
+        .earthquake-layout-right.detail-mode {
+            grid-template-rows: 1fr;
         }
         .map-label {
             position: absolute;
@@ -449,6 +461,28 @@
             backdrop-filter: blur(5px);
             border: 1px solid #e0e0e0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+        }
+        .quake-list-scroll {
+            height: 100%;
+            max-height: none;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .quake-detail-inline {
+            display: none;
+            background: #ffffff;
+            border-radius: 16px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            padding: 16px;
+            height: 100%;
+            min-height: 0;
+            overflow: hidden;
+            position: relative;
+            flex-direction: column;
         }
         
         .quake-table {
@@ -463,10 +497,10 @@
         
         .quake-table th {
             color: #1a1a1a;
-            padding: 12px 16px;
+            padding: 8px 10px;
             font-weight: bold;
             text-align: left;
-            font-size: 14px;
+            font-size: 13px;
         }
         
         .quake-table th:nth-child(1) {
@@ -517,13 +551,14 @@
         }
         
         .quake-table td {
-            padding: 12px 16px;
-            font-size: 16px;
+            padding: 7px 10px;
+            font-size: 13px;
             vertical-align: middle;
+            line-height: 1.25;
         }
         
         .quake-table td:nth-child(1) {
-            width: 110px;
+            width: 88px;
             text-align: center;
         }
         
@@ -532,10 +567,11 @@
         }
         
         .quake-table td:nth-child(3) {
-            width: 150px;
-            font-size: 14px;
+            width: 180px;
+            font-size: 13px;
             color: #999999;
             text-align: center;
+            white-space: nowrap;
         }
         
         .quake-table td:nth-child(4) {
@@ -551,7 +587,7 @@
         .m-strong { color: #d32f2f; }
         .m-mid { color: #f57c00; }
         .m-light { color: #388e3c; }
-        .place { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .place { overflow: visible; text-overflow: initial; white-space: normal; word-break: break-word; }
         .time { font-size: 13px; color: #999999; }
         .tsunami {
             font-size: 12px;
@@ -564,8 +600,8 @@
         .loading, .error { text-align: center; padding: 40px; color: #999999; }
         
         @media (max-width: 900px) {
-            .maps-container { flex-direction: column; height: auto; }
-            .globe-box, .mercator-box { min-height: 400px; }
+            .maps-container { grid-template-columns: 1fr; height: auto; }
+            .globe-box { min-height: 400px; }
             .quake-table th, .quake-table td { padding: 8px 12px; font-size: 12px; }
             .quake-table td:nth-child(1) { width: 70px; }
             .quake-table td:nth-child(3) { width: 100px; }
@@ -586,10 +622,10 @@
             font-family: monospace;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);\n        }
 
-        .filter-panel {
+.filter-panel {
     max-width: 1400px;
-    margin: 20px auto;
-    padding: 20px;
+    margin: 0;
+    padding: 12px;
     background: #ffffff;
     border: 1px solid #e0e0e0;
     border-radius: 16px;
@@ -600,9 +636,9 @@
 
         .filter-title {
             color: #1a1a1a;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -610,30 +646,30 @@
 
         .filter-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px 10px;
+            margin-bottom: 8px;
         }
 
         .filter-group {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 4px;
         }
 
         .filter-label {
             color: #666666;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
         }
 
         .filter-input, .filter-select {
-            padding: 10px 12px;
+            padding: 7px 10px;
             background: #ffffff;
             border: 1px solid #d0d0d0;
             border-radius: 8px;
             color: #1a1a1a;
-            font-size: 13px;
+            font-size: 12px;
             font-family: inherit;
         }
 
@@ -650,15 +686,15 @@
 
         .filter-buttons {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
         .filter-btn {
-            padding: 10px 20px;
+            padding: 7px 14px;
             border: none;
             border-radius: 8px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
@@ -1378,9 +1414,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 15px;
+            padding-bottom: 8px;
         }
 
         .quake-detail-title {
@@ -1412,14 +1448,15 @@
         .quake-detail-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 8px 12px;
+            margin-bottom: 10px;
         }
 
         .quake-detail-item {
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 2px;
+            padding: 2px 0;
         }
 
         .quake-detail-label {
@@ -1432,18 +1469,21 @@
 
         .quake-detail-value {
             color: #1a1a1a;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 600;
+            line-height: 1.25;
         }
 
         .quake-detail-ai {
             background: #f5f5f5;
             border-radius: 8px;
-            padding: 15px;
-            margin-top: 20px;
+            padding: 10px 12px;
+            margin-top: 8px;
             border-left: 4px solid #d32f2f;
+            flex: 1 1 auto;
+            min-height: 0;
             max-height: none;
-            overflow: visible;
+            overflow: auto;
         }
 
         .quake-detail-ai h4 {
@@ -1454,12 +1494,21 @@
 
         #aiSummaryContent {
             color: #333333;
-            line-height: 1.6;
+            line-height: 1.45;
             margin: 0;
-            font-size: 14px;
+            font-size: 13px;
             white-space: pre-line;
             max-height: none;
-            overflow: auto;
+            overflow: visible;
+        }
+        .quake-detail-back-wrap {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            margin: 0 !important;
+            display: flex;
+            justify-content: flex-end;
+            z-index: 3;
         }
 
         #aiSummaryContent a {
@@ -1575,12 +1624,12 @@
             display: inline-flex;
             align-items: center;
             gap: 7px;
-            padding: 5px 10px;
+            padding: 4px 8px;
             border-radius: 999px;
             color: #fff;
             font-weight: 700;
-            font-size: 13px;
-            min-width: 84px;
+            font-size: 12px;
+            min-width: 72px;
             justify-content: center;
         }
 
@@ -1598,7 +1647,7 @@
 
         .time-cell {
             color: var(--text-sub);
-            font-size: 13px;
+            font-size: 12px;
             white-space: nowrap;
         }
 
@@ -1633,7 +1682,7 @@
         }
 
         .skeleton-row td {
-            padding: 11px 16px;
+            padding: 8px 10px;
         }
 
         .skeleton {
@@ -1693,14 +1742,17 @@
             .moment-output { grid-template-columns: 1fr; }
             .surface-wave-sliders { grid-template-columns: 1fr; }
             .maps-container {
-                flex-direction: column;
-                height: auto !important;
+                grid-template-columns: 1fr;
+                min-height: auto !important;
             }
 
-            .globe-box, .mercator-box {
+            .globe-box {
                 width: 100%;
                 min-height: 320px !important;
                 height: min(58vh, 420px);
+            }
+            .earthquake-layout-right {
+                min-height: auto;
             }
 
             .filter-grid {
@@ -1948,8 +2000,7 @@
 
     <div id="earthquake-view" class="subpage-content" style="display:none;">
     <div class="header">
-        <h1>全球地震显示系统 | 真实昼夜模拟</h1>
-        <div class="subtitle">数据来源：USGS | 支持灵活筛选时间范围和震级 | 红点大小=震级 | 光照基于真实世界时间动态变化</div>
+        <h1>地震实例</h1>
         <div class="time-info" id="realTimeDisplay">🕒 加载时间...</div>
     </div>
     <div class="maps-container">
@@ -1957,13 +2008,8 @@
             <div class="map-label">🌐 3D 球形地球 (动态日照·真实昼夜)</div>
             <div class="light-tip" id="sunPosTip">☀️ 太阳方向计算中...</div>
         </div>
-        <div class="mercator-box" id="mercatorContainer">
-            <div class="map-label">🗺️ 墨卡托投影世界地图 (红点大小=震级)</div>
-        </div>
-    </div>
-
-    <div class="data-section">
-        <div class="filter-panel">
+        <div class="earthquake-layout-right">
+            <div class="filter-panel" id="quakeFilterPanel">
             <div class="filter-title">地震数据筛选</div>
             <div class="filter-grid">
                 <div class="filter-group">
@@ -2002,12 +2048,44 @@
                             <button type="button" class="sort-btn" data-sort-field="time" data-sort-order="asc">时间 ⬆</button>
                         </div>
                         <div id="filterMessage"></div>
+            </div>
+
+            <div class="quake-detail-inline" id="quakeDetailCard">
+                <div class="quake-detail-header">
+                    <div class="quake-detail-title" id="quakeDetailTitle">地震详情</div>
+                </div>
+                <div class="quake-detail-grid" id="quakeDetailGrid"></div>
+                <div class="quake-detail-ai" id="quakeDetailAi">
+                    <h4>AI 科普解读</h4>
+                    <div id="aiSummaryContent">加载中...</div>
+                </div>
+                <div class="quake-detail-back-wrap" style="margin-top:12px;display:flex;justify-content:center;">
+                    <button type="button" class="filter-btn filter-btn-reset" id="quakeDetailBackBtn">返回列表</button>
+                </div>
+            </div>
+
+            <div class="quake-list" id="quakeListPanel">
+                <div class="quake-list-scroll">
+                    <table class="quake-table">
+                        <thead>
+                            <tr>
+                                <th>震级</th>
+                                <th>地点</th>
+                                <th>时间</th>
+                                <th>海啸</th>
+                            </tr>
+                        </thead>
+                        <tbody id="quakeList" class="loading">
+                            <tr><td colspan="4" style="text-align: center; padding: 40px;">加载地震数据中...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="stats" id="stats">
-            <div class="stat-card"><div class="stat-number" id="totalCount">-</div><div class="stat-label">📊 地震总数</div></div>
-            <div class="stat-card"><div class="stat-number" id="avgMagnitude">-</div><div class="stat-label">📈 平均震级</div></div>
-            <div class="stat-card"><div class="stat-number" id="maxMagnitude">-</div><div class="stat-label">⚠️ 最大震级</div></div>
-        </div>
+    </div>
+
+    <div class="data-section">
+        <div class="stats" id="stats"></div>
 
         <div class="magnitude-info">
             <div class="magnitude-info-title"> 震级说明：矩震级 VS 里氏震级</div>
@@ -2111,22 +2189,6 @@
             </div>
         </div>
 
-        <div class="quake-list">
-            <table class="quake-table">
-                <thead>
-                    <tr>
-                        <th>震级</th>
-                        <th>地点</th>
-                        <th>时间</th>
-                        <th>海啸</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-                <tbody id="quakeList" class="loading">
-                    <tr><td colspan="5" style="text-align: center; padding: 40px;">加载地震数据中...</td></tr>
-                </tbody>
-            </table>
-        </div>
         <div class="back-home-wrap">
             <button class="filter-btn filter-btn-reset back-home-btn" data-home-target="home-view">返回首页</button>
         </div>
@@ -2416,27 +2478,8 @@
         }
     </script>
 
-    <script src="https://d3js.org/d3.v7.min.js"></script>
     <script type="module" src="./script.js"></script>
     <script src="assets/collab-heritage-topics.js"></script>
-
-    <!-- 地震详情弹窗 -->
-    <div class="quake-detail-modal" id="quakeDetailModal">
-        <div class="quake-detail-content">
-            <div class="quake-detail-header">
-                <div class="quake-detail-title" id="quakeDetailTitle">地震详情</div>
-                <button class="quake-detail-close" id="quakeDetailClose">&times;</button>
-            </div>
-            <div class="quake-detail-grid" id="quakeDetailGrid">
-                <!-- 详情内容将通过JavaScript动态填充 -->
-            </div>
-            <div class="quake-detail-ai" id="quakeDetailAi">
-                <h4>AI 科普解读</h4>
-                <div id="aiSummaryContent">加载中...</div>
-                <!-- 描述内容将通过JavaScript动态填充 -->
-            </div>
-        </div>
-    </div>
 </body>
 </html>
 

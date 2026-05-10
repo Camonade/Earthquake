@@ -82,8 +82,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         const globeRaycaster = new THREE.Raycaster();
         const globePointer = new THREE.Vector2();
         let hasBoundGlobeMarkerClick = false;
-        let hasBoundMercatorMarkerClick = false;
-        
         function getMarkerSize(mag) {
             const base = 0.014;
             const scale = Math.pow(2, (mag - 5.5) / 2.2);
@@ -187,6 +185,16 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         
         window.updateGlobeMarkers = updateGlobeMarkers;
         bindGlobeMarkerClick();
+
+        function focusGlobeOnCoord(lat, lon) {
+            if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+            const target = latLonToVector3(lat, lon, 1);
+            const distance = Math.max(2.4, camera.position.distanceTo(controls.target));
+            controls.target.copy(target);
+            camera.position.copy(target.clone().normalize().multiplyScalar(distance));
+            camera.lookAt(target);
+            controls.update();
+        }
       
         function formatLatLon(lat, lon) {
             const latAbs = Math.abs(lat).toFixed(1);
@@ -328,258 +336,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         
         window.updateGlobeMarkers = updateGlobeMarkers;
     
-        let mercatorSvg = null;
-        let mercatorContainerEl = null;
-        let currentProjection = null;
-        let currentMercatorEarthquakes = [];
-        let mercatorZoomBehavior = null;
-        let currentMercatorTransform = d3.zoomIdentity;
-        let mercatorViewportLayer = null;
-        let mercatorMarkerLayer = null;
-        const TERRAIN_BASEMAP_URL = './assets/textures/earth_atmos_2048.jpg';
-        const TERRAIN_BASEMAP_ASPECT = 2;
-
-        function getMercatorSize() {
-            const width = Math.max(320, mercatorContainerEl?.clientWidth || 320);
-            const height = Math.max(220, mercatorContainerEl?.clientHeight || 220);
-            return { width, height };
-        }
-
-        function getTerrainProjection(width, height) {
-            const frame = getTerrainFrame(width, height);
-            return d3.geoEquirectangular().fitExtent(
-                [[frame.x, frame.y], [frame.x + frame.width, frame.y + frame.height]],
-                { type: 'Sphere' }
-            );
-        }
-
-        function getTerrainFrame(width, height) {
-            const frameByWidth = { w: width, h: width / TERRAIN_BASEMAP_ASPECT };
-            const frameByHeight = { w: height * TERRAIN_BASEMAP_ASPECT, h: height };
-            const useWidthLimited = frameByWidth.h <= height;
-            const frameWidth = useWidthLimited ? frameByWidth.w : frameByHeight.w;
-            const frameHeight = useWidthLimited ? frameByWidth.h : frameByHeight.h;
-            const x = (width - frameWidth) / 2;
-            const y = (height - frameHeight) / 2;
-            return { x, y, width: frameWidth, height: frameHeight };
-        }
-
-        function drawMercatorMarkers(markerLayer, earthquakes, projection, width, height) {
-            markerLayer.selectAll('*').remove();
-            if (!earthquakes || earthquakes.length === 0) return;
-
-            earthquakes.forEach((quake, index) => {
-                const coords = quake?.geometry?.coordinates || [];
-                const lon = Number(coords[0]);
-                const lat = Number(coords[1]);
-                const mag = Number(quake?.properties?.mag || 0);
-                if (!Number.isFinite(lon) || !Number.isFinite(lat)) return;
-
-                const dataIndex = getQuakeIndexInCurrentData(quake, index);
-                if (dataIndex < 0) return;
-                const quakeKey = getQuakeStableKey(quake, dataIndex);
-                const isSelected = selectedQuakeKey && quakeKey === selectedQuakeKey;
-                const screenCoords = projection([lon, lat]);
-                if (!screenCoords) return;
-                const x = screenCoords[0];
-                const y = screenCoords[1];
-                if (!Number.isFinite(x) || !Number.isFinite(y)) return;
-                if (x < -70 || x > width + 70 || y < -70 || y > height + 70) return;
-
-                const radius = Math.min(2.4 * Math.pow(1.45, mag - 5.5), 13) * (isSelected ? 1.18 : 1);
-                const group = markerLayer.append('g')
-                    .attr('class', 'quake-marker')
-                    .attr('data-index', dataIndex);
-                group.append('circle')
-                    .attr('cx', x)
-                    .attr('cy', y)
-                    .attr('r', radius)
-                    .attr('fill', isSelected ? '#facc15' : '#ff3333')
-                    .attr('stroke', isSelected ? '#7c4a00' : '#ffffff')
-                    .attr('stroke-width', isSelected ? 1.1 : 0.6)
-                    .attr('opacity', 1);
-
-                if (mag >= 6) {
-                    group.append('text')
-                        .attr('x', x + radius + 3)
-                        .attr('y', y - 3)
-                        .attr('fill', '#ff8888')
-                        .attr('font-size', '9px')
-                        .attr('font-weight', 'bold')
-                        .attr('stroke', '#fff')
-                        .attr('stroke-width', 0.3)
-                        .text(mag.toFixed(1));
-                }
-
-                group.append('title')
-                    .text(`${quake.properties.place}\n震级: M${mag.toFixed(1)}\n时间: ${new Date(quake.properties.time).toLocaleString()}`);
-            });
-        }
-
-        function logProjectionReferencePoints(projection, width, height) {
-            const refs = [
-                { name: 'Singapore', lon: 103.8198, lat: 1.3521 },
-                { name: 'Beijing', lon: 116.4074, lat: 39.9042 },
-                { name: 'Norway(Oslo)', lon: 10.7522, lat: 59.9139 }
-            ].map((point) => {
-                const xy = projection([point.lon, point.lat]) || [NaN, NaN];
-                return {
-                    name: point.name,
-                    lon: point.lon,
-                    lat: point.lat,
-                    x: Number(xy[0]).toFixed(2),
-                    y: Number(xy[1]).toFixed(2),
-                    inView: Number.isFinite(xy[0]) && Number.isFinite(xy[1]) && xy[0] >= 0 && xy[0] <= width && xy[1] >= 0 && xy[1] <= height
-                };
-            });
-            console.table(refs);
-        }
-
-        function renderMercatorScene() {
-            console.log('[mercator] renderMercatorScene called');
-            if (!mercatorSvg || !mercatorContainerEl) {
-                console.warn('[mercator] render skipped: svg or container missing.');
-                return;
-            }
-
-            const { width, height } = getMercatorSize();
-            if (!(width > 0 && height > 0)) {
-                console.warn('[mercator] render skipped: invalid size.', { width, height });
-                return;
-            }
-
-            mercatorSvg.attr('width', width).attr('height', height);
-            currentProjection = getTerrainProjection(width, height);
-            logProjectionReferencePoints(currentProjection, width, height);
-
-            mercatorSvg.selectAll('*').remove();
-            mercatorSvg
-                .style('background-color', '#d9e9ff')
-                .style('pointer-events', 'all');
-
-            mercatorViewportLayer = mercatorSvg.append('g').attr('class', 'mercator-viewport-layer');
-            const terrainFrame = getTerrainFrame(width, height);
-            mercatorViewportLayer.append('image')
-                .attr('class', 'mercator-terrain')
-                .attr('href', TERRAIN_BASEMAP_URL)
-                .attr('x', terrainFrame.x)
-                .attr('y', terrainFrame.y)
-                .attr('width', terrainFrame.width)
-                .attr('height', terrainFrame.height)
-                .attr('preserveAspectRatio', 'none');
-
-            mercatorMarkerLayer = mercatorViewportLayer.append('g').attr('class', 'mercator-marker-layer');
-            drawMercatorMarkers(mercatorMarkerLayer, currentMercatorEarthquakes, currentProjection, width, height);
-
-            mercatorViewportLayer.attr('transform', currentMercatorTransform);
-            console.log('[mercator] terrain + markers rendered');
-        }
-
-        function resetMercatorView() {
-            if (!mercatorSvg || !mercatorZoomBehavior) return;
-            mercatorSvg.transition().duration(260).call(mercatorZoomBehavior.transform, d3.zoomIdentity);
-        }
-
-        function bindMercatorZoom() {
-            if (!mercatorSvg) return;
-            mercatorZoomBehavior = d3.zoom()
-                .scaleExtent([1, 12])
-                .on('start', () => mercatorSvg.style('cursor', 'grabbing'))
-                .on('zoom', (event) => {
-                    currentMercatorTransform = event.transform;
-                    if (mercatorViewportLayer) {
-                        mercatorViewportLayer.attr('transform', currentMercatorTransform);
-                    }
-                })
-                .on('end', () => mercatorSvg.style('cursor', 'grab'));
-
-            mercatorSvg
-                .call(mercatorZoomBehavior)
-                .on('dblclick.zoom', null)
-                .on('dblclick.reset', (event) => {
-                    event.preventDefault();
-                    resetMercatorView();
-                });
-        }
-
-        function drawBaseMap() {
-            console.log('[mercator] drawBaseMap called');
-            if (!mercatorContainerEl) {
-                console.warn('[mercator] container missing');
-                return;
-            }
-            const { width, height } = getMercatorSize();
-            if (!(width > 0 && height > 0)) {
-                console.warn('[mercator] drawBaseMap skipped: invalid size.', { width, height });
-                return;
-            }
-            mercatorSvg.attr('width', width).attr('height', height);
-            renderMercatorScene();
-        }
-
-        function runWhenDOMReady(callback) {
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', callback, { once: true });
-                return;
-            }
-            callback();
-        }
-
-        function initMercatorMap() {
-            mercatorContainerEl = document.getElementById('mercatorContainer');
-            if (!mercatorContainerEl) {
-                console.warn('Mercator container not found');
-                return;
-            }
-
-            const { width, height } = getMercatorSize();
-            if (!(width > 0 && height > 0)) {
-                console.warn('[mercator] init skipped: invalid initial size.', { width, height });
-                return;
-            }
-            mercatorSvg = d3.select(mercatorContainerEl)
-                .append('svg')
-                .attr('width', width)
-                .attr('height', height)
-                .style('background-color', '#d9e9ff')
-                .style('pointer-events', 'all')
-                .style('cursor', 'grab');
-
-            if (!hasBoundMercatorMarkerClick) {
-                hasBoundMercatorMarkerClick = true;
-                mercatorContainerEl.addEventListener('click', (event) => {
-                    const marker = event.target?.closest?.('.quake-marker');
-                    if (!marker || !mercatorContainerEl.contains(marker)) return;
-                    const idx = Number(marker.getAttribute('data-index'));
-                    if (!Number.isInteger(idx) || idx < 0) return;
-                    event.preventDefault();
-                    event.stopPropagation();
-                    showQuakeDetail(idx);
-                });
-            }
-
-            bindMercatorZoom();
-            drawBaseMap();
-            window.addEventListener('resize', () => drawBaseMap());
-        }
-
-        runWhenDOMReady(initMercatorMap);
-
-        function updateMercatorMarkers(earthquakes) {
-            currentMercatorEarthquakes = Array.isArray(earthquakes) ? earthquakes : [];
-            if (!mercatorSvg || !currentProjection) return;
-            if (mercatorMarkerLayer) {
-                const { width, height } = getMercatorSize();
-                drawMercatorMarkers(mercatorMarkerLayer, currentMercatorEarthquakes, currentProjection, width, height);
-                return;
-            }
-            renderMercatorScene();
-        }
-
-        window.updateMercatorMarkers = updateMercatorMarkers;
-        window.drawBaseMap = drawBaseMap;
-    
-
         function formatDate(date) {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -608,7 +364,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         let currentSortState = { field: 'mag', order: 'desc' };
         let currentListRenderVersion = 0;
         let lastFilterParams = null;
-        const TABLE_COLSPAN = 5;
+        const TABLE_COLSPAN = 4;
         let calendarYear = Number(getBeijingDateString().slice(0, 4));
         let calendarDataMap = new Map();
         const CALENDAR_CLICK_MIN_MAG = 5;
@@ -633,7 +389,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             if (sectionId === 'main-earthquake') {
                 requestAnimationFrame(() => {
                     window.dispatchEvent(new Event('resize'));
-                    if (window.drawBaseMap) window.drawBaseMap();
                 });
             }
         }
@@ -683,7 +438,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             if (subview === 'map') {
                 requestAnimationFrame(() => {
                     window.dispatchEvent(new Event('resize'));
-                    if (window.drawBaseMap) window.drawBaseMap();
                 });
             }
         }
@@ -799,7 +553,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             displayEarthquakes({ features: finalDisplayData });
             updateStats(finalDisplayData);
             if (window.updateGlobeMarkers) window.updateGlobeMarkers(finalDisplayData);
-            if (window.updateMercatorMarkers) window.updateMercatorMarkers(finalDisplayData);
 
             updateSortButtonActiveState();
 
@@ -937,10 +690,15 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         }
         
         function updateStats(quakes) {
+            const totalEl = document.getElementById('totalCount');
+            const avgEl = document.getElementById('avgMagnitude');
+            const maxEl = document.getElementById('maxMagnitude');
+            if (!totalEl || !avgEl || !maxEl) return;
+
             if (!quakes || quakes.length === 0) {
-                document.getElementById('totalCount').textContent = '0';
-                document.getElementById('avgMagnitude').textContent = '-';
-                document.getElementById('maxMagnitude').textContent = '-';
+                totalEl.textContent = '0';
+                avgEl.textContent = '-';
+                maxEl.textContent = '-';
                 return;
             }
             const total = quakes.length;
@@ -950,9 +708,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
                 sumMag += mag;
                 if (mag > maxMag) maxMag = mag;
             }
-            document.getElementById('totalCount').textContent = total;
-            document.getElementById('avgMagnitude').textContent = (sumMag / total).toFixed(1);
-            document.getElementById('maxMagnitude').textContent = maxMag.toFixed(1);
+            totalEl.textContent = total;
+            avgEl.textContent = (sumMag / total).toFixed(1);
+            maxEl.textContent = maxMag.toFixed(1);
         }
 
         function getPlaceCacheKey(originalPlace, lat, lng) {
@@ -1029,6 +787,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             const quake = window.currentEarthquakeData?.[index];
             if (!quake) return;
             selectedQuakeKey = getQuakeStableKey(quake, index);
+            const coords = quake.geometry?.coordinates || [0, 0];
+            focusGlobeOnCoord(Number(coords[1]), Number(coords[0]));
             applyCurrentView();
             const mapWrap = document.querySelector('.maps-container');
             if (mapWrap) {
@@ -1078,12 +838,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
                         <td data-label="地点" class="place" data-orig-place="${placeEsc}" data-place-key="${placeKeyEsc}" data-lat="${quake.geometry.coordinates[1]}" data-lng="${quake.geometry.coordinates[0]}">📍 ${placeEsc}</td>
                         <td data-label="时间" class="time-cell" title="${fullTime}">🕒 ${relativeTime}</td>
                         <td data-label="海啸"><span class="tsunami ${props.tsunami === 1 ? 'tsunami-yes' : 'tsunami-no'}">${props.tsunami === 1 ? '⚠️ 有' : '无'}</span></td>
-                        <td data-label="操作">
-                            <div class="row-actions">
-                                <button type="button" class="action-icon" title="复制地点" onclick="copyPlace(event, ${i})">复制地点</button>
-                                <button type="button" class="action-icon" title="地图定位" onclick="locateQuake(event, ${i})">地图定位</button>
-                            </div>
-                        </td>
                     </tr>
                 `;
             }
@@ -1448,6 +1202,17 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
                 .join('<br>');
         }
 
+        function toggleQuakeDetailMode(showDetail) {
+            const filterPanel = document.getElementById('quakeFilterPanel');
+            const listPanel = document.getElementById('quakeListPanel');
+            const detailCard = document.getElementById('quakeDetailCard');
+            const rightPanel = document.querySelector('.earthquake-layout-right');
+            if (filterPanel) filterPanel.style.display = showDetail ? 'none' : '';
+            if (listPanel) listPanel.style.display = showDetail ? 'none' : '';
+            if (detailCard) detailCard.style.display = showDetail ? 'flex' : 'none';
+            if (rightPanel) rightPanel.classList.toggle('detail-mode', !!showDetail);
+        }
+
         async function showQuakeDetail(index) {
             const quake = window.currentEarthquakeData[index];
             if (!quake) return;
@@ -1458,6 +1223,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             const originalPlace = props.place || '未知地点';
             const lat = Number(coords[1]);
             const lng = Number(coords[0]);
+            selectedQuakeKey = getQuakeStableKey(quake, index);
+            focusGlobeOnCoord(lat, lng);
+            applyCurrentView();
 
             let placeText = originalPlace;
             try {
@@ -1479,11 +1247,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
                 <div class="quake-detail-item"><div class="quake-detail-label">纬度</div><div class="quake-detail-value">${Number(coords[1] || 0).toFixed(4)}°</div></div>
                 <div class="quake-detail-item"><div class="quake-detail-label">深度</div><div class="quake-detail-value">${Number(coords[2] || 0).toFixed(1)} km</div></div>
                 <div class="quake-detail-item"><div class="quake-detail-label">时间</div><div class="quake-detail-value">${new Date(props.time).toLocaleString()}</div></div>
-                <div class="quake-detail-item"><div class="quake-detail-label">海啸风险</div><div class="quake-detail-value">${props.tsunami === 1 ? '⚠️ 有海啸风险' : '无海啸风险'}</div></div>
-                <div class="quake-detail-item"><div class="quake-detail-label">数据来源</div><div class="quake-detail-value">USGS</div></div>
             `;
 
-            document.getElementById('quakeDetailModal').style.display = 'block';
+            toggleQuakeDetailMode(true);
 
             const aiSummaryDiv = document.getElementById('aiSummaryContent');
             if (aiSummaryDiv) aiSummaryDiv.textContent = '加载中...';
@@ -1508,15 +1274,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             }
         }
 
-        function closeQuakeDetail() {
-            document.getElementById('quakeDetailModal').style.display = 'none';
-        }
-
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeQuakeDetail();
-            }
-        });
+        
 
         let originalEarthquakeData = [];
 
@@ -2112,14 +1870,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
                 fetchCalendarData(calendarYear);
             });
             bindSortControls();
-            document.getElementById('quakeDetailClose').addEventListener('click', closeQuakeDetail);
-            const modalEl = document.getElementById('quakeDetailModal');
-            if (modalEl) {
-                modalEl.addEventListener('click', function(e) {
-                    if (e.target === this) closeQuakeDetail();
-                });
-            }
-            
+            document.getElementById('quakeDetailBackBtn')?.addEventListener('click', () => {
+                toggleQuakeDetailMode(false);
+            });
             // 注释
             initializeFilterDates();
             initHomeCarousel();
@@ -2191,4 +1944,9 @@ window.filterEarthquakesByDate = filterEarthquakesByDate;
             const day = parts.find(p => p.type === 'day')?.value;
             return `${year}-${month}-${day}`;
         }
+
+
+
+
+
 
