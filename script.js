@@ -255,14 +255,14 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             const currentSec = Math.floor(now.getTime() / 1000);
             if (currentSec === lastUpdateSecond) return;
             lastUpdateSecond = currentSec;
-            
+
             const sunDir = getSolarDirectionVector();
             const distance = 8.5;
             const lightPos = sunDir.clone().multiplyScalar(distance);
             sunLight.position.copy(lightPos);
             sunLight.target = earth;
             sunLight.updateMatrixWorld();
-            
+
             const sunY = sunDir.y;
             let ambientIntensity = 0.55;
             let backFillIntensity = 0.45;
@@ -283,31 +283,21 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             ambientLight.intensity = ambientIntensity;
             backFillLight.intensity = backFillIntensity;
             rimLight.intensity = rimIntensity;
-            
+
             const intensityBase = 1.3;
             const sunHeightFactor = Math.max(0.2, Math.min(1.2, (sunY + 0.5) * 0.9 + 0.6));
             sunLight.intensity = intensityBase * sunHeightFactor;
-            
-            // 注释
+
             const subPoint = getSubSolarPointLatLon();
             const tipDiv = document.getElementById('sunPosTip');
             if (tipDiv) {
-                // 太阳计算链路中的经度符号与常规地理显示约定相反，这里仅在展示层取反。
-                tipDiv.innerHTML = ` 实时日照 | 直射点 ${formatLatLon(subPoint.lat, -subPoint.lon)}<br>  基于 UTC 时间`;
+                tipDiv.innerHTML = ` 实时日照 | 直射点 ${formatLatLon(subPoint.lat, -subPoint.lon)}`;
             }
         }
-        // 注释
+
         function updateUITime() {
-            const now = new Date();
-            const utcStr = now.toUTCString();
-            const sub = getSubSolarPointLatLon();
-            const el = document.getElementById('realTimeDisplay');
-            if (el) {
-                // 同上：显示用经度与光照计算用经度做符号转换，保证 E/W 与视觉一致。
-                el.innerHTML = `🕒 ${utcStr} | ☀️ 太阳直射: ${formatLatLon(sub.lat, -sub.lon)}`;
-            }
+            // 标题副信息已移除，保留函数以兼容现有调用。
         }
-        
         function animate() {
             requestAnimationFrame(animate);
             updateRealTimeSunlight();
