@@ -7,9 +7,31 @@ const path = require('path');
 const earthquakesRouter = require('./routes/earthquakes');
 const translateRouter = require('./routes/translate');
 const summaryRouter = require('./routes/summary');
+const { isCacheStale, prefetchAll, getFetchErrorMessage } = require('./services/earthquakeCache');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+let cacheRefreshInFlight = false;
+
+async function refreshCacheInBackgroundIfNeeded() {
+  if (cacheRefreshInFlight) return;
+  const stale = await isCacheStale();
+  if (!stale) return;
+
+  cacheRefreshInFlight = true;
+  console.log('[cache] earthquake cache missing/stale, starting background prefetch');
+  void prefetchAll()
+    .then((payload) => {
+      console.log(`[cache] prefetch finished, features=${payload.features.length}`);
+    })
+    .catch((error) => {
+      console.error('[cache] prefetch failed:', getFetchErrorMessage(error));
+    })
+    .finally(() => {
+      cacheRefreshInFlight = false;
+    });
+}
 
 app.use(cors());
 app.use(express.json());
@@ -45,4 +67,5 @@ app.get('*', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Earthquake server running at http://localhost:${PORT}`);
+  void refreshCacheInBackgroundIfNeeded();
 });
