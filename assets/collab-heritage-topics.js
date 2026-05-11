@@ -7,6 +7,10 @@
             images: [
                 'images/大裂谷/东非大裂谷.png',
                 'images/大裂谷/云南大裂谷.jpg',
+                'images/大裂谷/东非大裂谷2.webp',
+                'images/大裂谷/大裂谷1.jpg',
+                'images/大裂谷/大裂谷2.jpg',
+                'images/大裂谷/武陵大裂谷.jpg',
                 'images/断裂带/东非大裂谷.png'
             ]
         },
@@ -17,6 +21,8 @@
             images: [
                 'images/河流三角洲/奥卡万戈三角洲湖泊.jpg',
                 'images/河流三角洲/奥卡万戈三角洲湖泊 (1).jpg',
+                'images/河流三角洲/三角洲.jpg',
+                'images/河流三角洲/伏尔加河三角洲.jpg',
                 'images/河流三角洲/奥卡万戈三角洲湖泊.jpg'
             ]
         },
@@ -27,7 +33,10 @@
             images: [
                 'images/瀑布景观/九寨沟.jpg',
                 'images/瀑布景观/黄河断层瀑布—壶口瀑布.jpg',
-                'images/瀑布景观/汶川地震堰塞湖.jpg'
+                'images/瀑布景观/汶川地震堰塞湖.jpg',
+                'images/瀑布景观/瀑布.jpeg',
+                'images/瀑布景观/瀑布1.jpg',
+                'images/瀑布景观/瀑布2.jpg'
             ]
         },
         {
@@ -57,6 +66,8 @@
             images: [
                 'images/湖泊景观/小南海堰塞湖.jpg',
                 'images/湖泊景观/党家岔堰塞湖.jpg',
+                'images/湖泊景观/堰塞湖1.jpg',
+                'images/湖泊景观/堰塞湖2.jpg',
                 'images/瀑布景观/汶川地震堰塞湖.jpg'
             ]
         },
@@ -67,6 +78,8 @@
             images: [
                 'images/断层地貌/汶川映秀断层.jpg',
                 'images/断层地貌/华山断层崖.jpg',
+                'images/断层地貌/地震断层崖.jpg',
+                'images/断层地貌/地震断层崖2.jpeg',
                 'images/断裂带/郯庐断裂带.jpg'
             ]
         },
@@ -77,7 +90,8 @@
             images: [
                 'images/独特的地貌/海原古柳撕裂.png',
                 'images/独特的地貌/九寨沟地震前后.jpg',
-                'images/独特的地貌/双乳峰.jpg'
+                'images/独特的地貌/双乳峰.jpg',
+                'images/独特的地貌/古地震遗迹3.jpg'
             ]
         },
         {
@@ -87,6 +101,8 @@
             images: [
                 'images/断层地貌/华山断层崖.jpg',
                 'images/断层地貌/汶川映秀断层.jpg',
+                'images/断层地貌/地震断层崖.jpg',
+                'images/断层地貌/地震断层崖2.jpeg',
                 'images/断裂带/郯庐断裂带.jpg'
             ]
         }
