@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "vite --host 0.0.0.0",
-    "build": "vite build"
+    "build": "vite build",
+    "test:csv": "node scripts/test-escape-csv.js",
+    "prefetch": "node scripts/prefetch.js"
   },
   "keywords": [
     "earthquake",

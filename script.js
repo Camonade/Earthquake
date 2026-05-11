@@ -349,11 +349,26 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             if (queryTimezone) params.set('tz', queryTimezone);
             return `/api/earthquakes?${params.toString()}`;
         }
+
+        function buildChinaLocalApiUrl(queryStartDate, queryEndDate, queryMinMag, queryMaxMag) {
+            const formattedStart = formatDate(new Date(queryStartDate));
+            const formattedEnd = formatDate(new Date(queryEndDate));
+            const minMag = Math.max(0, queryMinMag || 4);
+            const maxMag = Number.isFinite(queryMaxMag) ? queryMaxMag : '';
+            const params = new URLSearchParams({
+                start: formattedStart,
+                end: formattedEnd,
+                minMag: String(minMag)
+            });
+            if (maxMag !== '') params.set('maxMag', String(maxMag));
+            return `/api/china-earthquakes/local?${params.toString()}`;
+        }
         
         window.currentEarthquakeData = [];
         let currentSortState = { field: 'mag', order: 'desc' };
         let currentListRenderVersion = 0;
         let lastFilterParams = null;
+        let isLocalChinaDataSource = false;
         const TABLE_COLSPAN = 4;
         let calendarYear = Number(getBeijingDateString().slice(0, 4));
         let calendarDataMap = new Map();
@@ -975,6 +990,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
         function getFinalDisplayEarthquakes(quakes) {
             const domesticOnlyEnabled = document.getElementById('domesticOnlyToggle')?.checked;
+            if (domesticOnlyEnabled && isLocalChinaDataSource) return quakes;
             return domesticOnlyEnabled ? filterDomesticEarthquakes(quakes) : quakes;
         }
 
@@ -1284,7 +1300,23 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         }
 
         function rerenderByCurrentToggle() {
-            applyCurrentView('已更新国内地震筛选');
+            let { startDate, endDate, minMag, maxMag } = getFilterValues();
+            if ((!startDate || !endDate) && lastFilterParams) {
+                startDate = lastFilterParams.startDate;
+                endDate = lastFilterParams.endDate;
+                minMag = lastFilterParams.minMag;
+                maxMag = lastFilterParams.maxMag;
+            }
+            if (!startDate || !endDate) {
+                initializeFilterDates();
+                const values = getFilterValues();
+                startDate = values.startDate;
+                endDate = values.endDate;
+                minMag = values.minMag;
+                maxMag = values.maxMag;
+            }
+            lastFilterParams = { startDate, endDate, minMag, maxMag, timezone: '' };
+            loadEarthquakesWithFilter(startDate, endDate, minMag, maxMag, 2000, '');
         }
 
         function runChinaDomainRegressionChecks() {
@@ -1337,7 +1369,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             try {
                 renderTableLoading(` 正在加载数据（${queryStartDate} 至 ${queryEndDate}，最小震级 M${queryMinMag}）...`);
                 
-                const newApiUrl = buildEarthquakeApiUrl(queryStartDate, queryEndDate, queryMinMag, queryMaxMag, queryLimit, queryTimezone);
+                const domesticOnlyEnabled = document.getElementById('domesticOnlyToggle')?.checked === true;
+                const useChinaLocalSource = domesticOnlyEnabled && Number(queryMinMag) >= 4;
+                const newApiUrl = useChinaLocalSource
+                    ? buildChinaLocalApiUrl(queryStartDate, queryEndDate, queryMinMag, queryMaxMag)
+                    : buildEarthquakeApiUrl(queryStartDate, queryEndDate, queryMinMag, queryMaxMag, queryLimit, queryTimezone);
                 const response = await fetch(newApiUrl);
                 if (!response.ok) {
                     let errMsg = '网络请求失败';
@@ -1357,12 +1393,14 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
                 }
 
                 if (filtered.length === 0) {
-                    setFilterMessage('ℹ️ 没有符合条件的数据', 'info');
+                    setFilterMessage('没有符合条件的数据', 'info');
                 } else {
-                    setFilterMessage(`✅ 筛选成功，共 ${filtered.length} 条数据`, 'success');
+                    setFilterMessage(`筛选成功，共${filtered.length}条数据`, 'success');
                 }
 
+                isLocalChinaDataSource = useChinaLocalSource;
                 originalEarthquakeData = [...filtered];
+                window.currentEarthquakeData = [...filtered];
                 applyCurrentView();
             } catch (error) {
                 renderTableError(`加载失败：${error.message}，请检查网络连接或筛选条件`, 'retryLastFilterLoad');
@@ -1821,7 +1859,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             showView('home-view');
             document.getElementById('filterApplyBtn').addEventListener('click', filterEarthquakes);
             document.getElementById('filterResetBtn').addEventListener('click', resetFilter);
-            document.getElementById('domesticOnlyToggle')?.addEventListener('change', rerenderByCurrentToggle);
+            const domesticOnlyToggle = document.getElementById('domesticOnlyToggle');
+            if (domesticOnlyToggle) {
+                domesticOnlyToggle.checked = false;
+                domesticOnlyToggle.addEventListener('change', rerenderByCurrentToggle);
+            }
             document.getElementById('calendarPrevBtn')?.addEventListener('click', () => {
                 calendarYear -= 1;
                 fetchCalendarData(calendarYear);
@@ -1906,9 +1948,4 @@ window.filterEarthquakesByDate = filterEarthquakesByDate;
             const day = parts.find(p => p.type === 'day')?.value;
             return `${year}-${month}-${day}`;
         }
-
-
-
-
-
 

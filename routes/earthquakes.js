@@ -1,5 +1,11 @@
 const express = require('express');
 const https = require('https');
+const {
+  filterFeatures,
+  fetchRealtimeAndUpdateCache,
+  readCacheSafe,
+  getFetchErrorMessage
+} = require('../services/earthquakeCache');
 
 const router = express.Router();
 const fetchImpl =
@@ -11,18 +17,6 @@ const fetchNode =
   typeof global.fetch === 'function'
     ? (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args))
     : null;
-
-function toValidDateString(value, fallback) {
-  if (!value) return fallback;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return fallback;
-  return date.toISOString().slice(0, 10);
-}
-
-function toNumber(value, fallback) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-}
 
 function formatDateOnly(date) {
   return new Date(date).toISOString().slice(0, 10);
@@ -64,13 +58,6 @@ function getBeijingDayUtcRange(dateText) {
   };
 }
 
-function getFetchErrorMessage(error) {
-  const base = error?.message || String(error);
-  const causeCode = error?.cause?.code || '';
-  if (causeCode) return `${base} (${causeCode})`;
-  return base;
-}
-
 async function fetchUsgs(url) {
   const timeoutMs = 12000;
   const controller = new AbortController();
@@ -98,60 +85,28 @@ const CALENDAR_STATS_CACHE_TTL_MS = 60 * 60 * 1000;
 
 router.get('/', async (req, res) => {
   try {
-    const now = new Date();
-    const thirtyDaysAgo = addDays(now, -29);
-
-    const start = toValidDateString(req.query.start, formatDateOnly(thirtyDaysAgo));
-    const end = toValidDateString(req.query.end, now.toISOString().slice(0, 10));
-    const minMag = toNumber(req.query.minMag, 5.5);
-    const maxMag = toNumber(req.query.maxMag, Infinity);
-    const limitRaw = toNumber(req.query.limit, 100);
-    const limit = Math.max(1, Math.min(2000, Math.floor(limitRaw)));
-    const tz = String(req.query.tz || '').trim();
-
-    if (new Date(start) > new Date(end)) {
-      return res.status(400).json({
-        error: 'Invalid date range',
-        message: 'start date cannot be later than end date'
-      });
-    }
-
-    const usgsUrl = new URL('https://earthquake.usgs.gov/fdsnws/event/1/query');
-    usgsUrl.searchParams.set('format', 'geojson');
-    if (tz === 'Asia/Shanghai') {
-      usgsUrl.searchParams.set('starttime', getBeijingDayUtcRange(start).start);
-      usgsUrl.searchParams.set('endtime', getBeijingDayUtcRange(end).end);
-    } else {
-      usgsUrl.searchParams.set('starttime', start);
-      usgsUrl.searchParams.set('endtime', end);
-    }
-    usgsUrl.searchParams.set('minmagnitude', String(Math.max(0, minMag)));
-    if (Number.isFinite(maxMag)) {
-      usgsUrl.searchParams.set('maxmagnitude', String(Math.max(0, maxMag)));
-    }
-    usgsUrl.searchParams.set('orderby', 'time');
-    usgsUrl.searchParams.set('limit', String(limit));
-
-    const response = await fetchUsgs(usgsUrl.toString());
-    if (!response.ok) {
-      return res.status(502).json({
-        error: 'Failed to fetch data from USGS',
-        message: `USGS upstream status: ${response.status}`
-      });
-    }
-
-    const data = await response.json();
-    const filtered = Array.isArray(data.features) ? data.features : [];
-
+    const liveData = await fetchRealtimeAndUpdateCache(req.query);
     return res.json({
-      ...data,
-      features: filtered
+      ...liveData,
+      _dataSource: 'usgs-live'
     });
-  } catch (error) {
-    return res.status(502).json({
-      error: 'Upstream request failed',
-      message: getFetchErrorMessage(error)
-    });
+  } catch (liveError) {
+    try {
+      const cached = await readCacheSafe();
+      const filtered = filterFeatures(cached.features, req.query);
+      return res.json({
+        ...cached,
+        features: filtered,
+        _dataSource: 'local-cache'
+      });
+    } catch (cacheError) {
+      return res.status(500).json({
+        error: 'No data available',
+        message: `live failed: ${getFetchErrorMessage(liveError)}; cache failed: ${getFetchErrorMessage(
+          cacheError
+        )}`
+      });
+    }
   }
 });
 
