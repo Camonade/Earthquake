@@ -349,6 +349,20 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             if (queryTimezone) params.set('tz', queryTimezone);
             return `/api/earthquakes?${params.toString()}`;
         }
+
+        function buildChinaLocalApiUrl(queryStartDate, queryEndDate, queryMinMag, queryMaxMag) {
+            const formattedStart = formatDate(new Date(queryStartDate));
+            const formattedEnd = formatDate(new Date(queryEndDate));
+            const minMag = Math.max(0, queryMinMag || 4);
+            const maxMag = Number.isFinite(queryMaxMag) ? queryMaxMag : '';
+            const params = new URLSearchParams({
+                start: formattedStart,
+                end: formattedEnd,
+                minMag: String(minMag)
+            });
+            if (maxMag !== '') params.set('maxMag', String(maxMag));
+            return `/api/china-earthquakes/local?${params.toString()}`;
+        }
         
         window.currentEarthquakeData = [];
         let currentSortState = { field: 'mag', order: 'desc' };
@@ -1284,7 +1298,13 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         }
 
         function rerenderByCurrentToggle() {
-            applyCurrentView('已更新国内地震筛选');
+            const { startDate, endDate, minMag, maxMag } = getFilterValues();
+            if (!startDate || !endDate) {
+                applyCurrentView('Filter updated');
+                return;
+            }
+            lastFilterParams = { startDate, endDate, minMag, maxMag, timezone: '' };
+            loadEarthquakesWithFilter(startDate, endDate, minMag, maxMag, 2000, '');
         }
 
         function runChinaDomainRegressionChecks() {
@@ -1337,7 +1357,11 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             try {
                 renderTableLoading(` 正在加载数据（${queryStartDate} 至 ${queryEndDate}，最小震级 M${queryMinMag}）...`);
                 
-                const newApiUrl = buildEarthquakeApiUrl(queryStartDate, queryEndDate, queryMinMag, queryMaxMag, queryLimit, queryTimezone);
+                const domesticOnlyEnabled = document.getElementById('domesticOnlyToggle')?.checked === true;
+                const useChinaLocalSource = domesticOnlyEnabled && Number(queryMinMag) >= 4;
+                const newApiUrl = useChinaLocalSource
+                    ? buildChinaLocalApiUrl(queryStartDate, queryEndDate, queryMinMag, queryMaxMag)
+                    : buildEarthquakeApiUrl(queryStartDate, queryEndDate, queryMinMag, queryMaxMag, queryLimit, queryTimezone);
                 const response = await fetch(newApiUrl);
                 if (!response.ok) {
                     let errMsg = '网络请求失败';
@@ -1357,9 +1381,10 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
                 }
 
                 if (filtered.length === 0) {
-                    setFilterMessage('ℹ️ 没有符合条件的数据', 'info');
+                    setFilterMessage('No matching earthquakes', 'info');
                 } else {
-                    setFilterMessage(`✅ 筛选成功，共 ${filtered.length} 条数据`, 'success');
+                    const sourceText = useChinaLocalSource ? ' (China local CSV)' : '';
+                    setFilterMessage(`Filter applied${sourceText}, ${filtered.length} records`, 'success');
                 }
 
                 originalEarthquakeData = [...filtered];
@@ -1906,9 +1931,3 @@ window.filterEarthquakesByDate = filterEarthquakesByDate;
             const day = parts.find(p => p.type === 'day')?.value;
             return `${year}-${month}-${day}`;
         }
-
-
-
-
-
-

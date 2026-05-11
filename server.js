@@ -5,6 +5,7 @@ const cors = require('cors');
 const path = require('path');
 
 const earthquakesRouter = require('./routes/earthquakes');
+const chinaLocalRouter = require('./routes/chinaLocal');
 const translateRouter = require('./routes/translate');
 const summaryRouter = require('./routes/summary');
 const { isCacheStale, prefetchAll, getFetchErrorMessage } = require('./services/earthquakeCache');
@@ -43,6 +44,7 @@ app.use('/api', (req, res, next) => {
 });
 
 app.use('/api/earthquakes', earthquakesRouter);
+app.use('/api/china-earthquakes', chinaLocalRouter);
 app.use('/api/translate', translateRouter);
 app.use('/api/generate-summary', summaryRouter);
 
