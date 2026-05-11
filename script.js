@@ -1381,10 +1381,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
                 }
 
                 if (filtered.length === 0) {
-                    setFilterMessage('No matching earthquakes', 'info');
+                    setFilterMessage('没有符合条件的数据', 'info');
                 } else {
-                    const sourceText = useChinaLocalSource ? ' (China local CSV)' : '';
-                    setFilterMessage(`Filter applied${sourceText}, ${filtered.length} records`, 'success');
+                    setFilterMessage(`筛选成功，共${filtered.length}条数据`, 'success');
                 }
 
                 originalEarthquakeData = [...filtered];
