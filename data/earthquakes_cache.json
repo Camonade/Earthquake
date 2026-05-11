@@ -1,14 +1,14 @@
 {
   "type": "FeatureCollection",
   "metadata": {
-    "generated": 1778508554000,
+    "generated": 1778512302000,
     "url": "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2026-05-11&endtime=2026-05-11&minmagnitude=5.5&orderby=time&limit=2000",
     "title": "USGS Earthquakes",
     "status": 200,
     "api": "2.4.0",
     "limit": 2000,
     "offset": 1,
-    "updatedAt": "2026-05-11T14:09:15.285Z",
+    "updatedAt": "2026-05-11T15:11:42.692Z",
     "source": "USGS realtime+cache merge"
   },
   "features": [
