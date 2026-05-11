@@ -1033,6 +1033,33 @@
             border-bottom: none;
         }
 
+        .intensity-video-player {
+            display: block;
+            width: 100%;
+            max-width: 800px;
+            height: auto;
+            margin: 0 auto;
+            border-radius: 12px;
+            background: rgba(10, 20, 40, 0.35);
+        }
+
+        .intensity-video-fallback {
+            display: none;
+            margin-top: 10px;
+            text-align: center;
+            color: #f0cfcf;
+        }
+
+        .intensity-video-card {
+            background: transparent !important;
+            border: none !important;
+            border-radius: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
         .emphasis {
             color: #d32f2f;
             font-weight: 600;
@@ -2408,6 +2435,19 @@
                         <div class="intensity-item"><strong>XI</strong><p>地震断裂带延续很长，伴随大量山崩滑坡，地表形变明显。</p></div>
                         <div class="intensity-item"><strong>XII</strong><p>毁灭性破坏，地貌发生显著变化，山河改观。</p></div>
                     </div>
+                </article>
+                <article class="edu-card full intensity-video-card">
+                    <h4>震感逐级放大镜：不同烈度下教室环境模拟（3~12度）</h4>
+                    <video
+                        class="intensity-video-player"
+                        controls
+                        preload="metadata"
+                        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                    >
+                        <source src="/videos/intensity.mp4" type="video/mp4">
+                        您的浏览器不支持视频播放。
+                    </video>
+                    <p class="intensity-video-fallback">视频加载失败，请检查文件</p>
                 </article>
                 <article class="edu-card full">
                     <h4>交互估算</h4>
