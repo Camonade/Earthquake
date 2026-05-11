@@ -89,6 +89,7 @@
             display: flex;
             gap: 16px;
             align-items: flex-start;
+            padding-top: 20px;
         }
         .knowledge-sidebar {
             width: 240px;
@@ -102,6 +103,8 @@
             display: flex;
             flex-direction: column;
             gap: 8px;
+            margin-top: 0;
+            padding-top: 10px;
         }
         .knowledge-nav-btn {
             border: 1px solid rgba(60, 82, 128, 0.14);
@@ -121,6 +124,8 @@
         .knowledge-content {
             flex: 1;
             min-width: 0;
+            margin-top: -20px;
+            padding-top: 0px;
         }
         .heritage-placeholder {
             background: rgba(255, 255, 255, 0.88);
@@ -1163,6 +1168,23 @@
             border-left-color: #ffa726;
         }
 
+        .plate-tectonics-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .plate-tectonics-grid .edu-card,
+        .plate-tectonics-grid .edu-card.full {
+            grid-column: auto;
+            background: rgba(245, 249, 255, 0.88);
+            border: 1px solid #3b82f6;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 6px 18px rgba(21, 101, 192, 0.08);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
         .compare-style .formula-highlight {
             background: rgba(255, 243, 224, 0.9);
             border-color: rgba(255, 167, 38, 0.5);
@@ -1729,6 +1751,7 @@
 
         @media (max-width: 768px) {
             .edu-card { grid-column: 1 / -1; }
+            .plate-tectonics-grid { grid-template-columns: 1fr; }
             .energy-row { grid-template-columns: 68px 1fr; }
             .energy-value { grid-column: 1 / -1; text-align: left; }
             .intensity-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -1927,6 +1950,7 @@
         <div class="knowledge-layout">
             <aside class="knowledge-sidebar">
                 <button type="button" class="knowledge-nav-btn active" data-knowledge-view="stress-view">构造应力</button>
+                <button type="button" class="knowledge-nav-btn" data-knowledge-view="plate-tectonics-view">板块运动</button>
                 <button type="button" class="knowledge-nav-btn" data-knowledge-view="richter-view">里氏震级</button>
                 <button type="button" class="knowledge-nav-btn" data-knowledge-view="moment-view">矩震级</button>
                 <button type="button" class="knowledge-nav-btn" data-knowledge-view="surface-view">面波震级</button>
@@ -2209,6 +2233,43 @@
                     <p><span class="formula-highlight">σ1 ≥ σ2 ≥ σ3</span>：最大、中间、最小主应力共同控制断裂方式。</p>
                 </article>
             </div>
+        </div>
+        <div class="back-home-wrap"><button class="filter-btn filter-btn-reset back-home-btn" data-home-target="home-view">返回首页</button></div>
+    </div>
+<div id="plate-tectonics-view" class="subpage-content compare-style knowledge-view" style="display:none;">
+        <div class="science-card">
+            <h3>板块运动</h3>
+            <div class="edu-grid plate-tectonics-grid">
+                <article class="edu-card full">
+                    <h4>1) 板块运动基本概念</h4>
+                    <p>地球岩石圈被分割成若干较为刚性的板块，包括太平洋板块、亚欧板块、印度洋板块、美洲板块、非洲板块、南极洲板块等。</p>
+                    <p>板块在地幔对流驱动下缓慢移动，速度约每年几厘米，板块运动是地震、火山、造山运动等的根本原因。</p>
+                </article>
+                <article class="edu-card full">
+                    <h4>2) 板块边界类型与地震</h4>
+                    <p><strong>消亡边界（俯冲带/碰撞带）：</strong>板块相互碰撞，产生逆冲断层，引发强烈地震（如日本311地震、智利9.5级地震），常伴随海啸和火山。</p>
+                    <p><strong>生长边界（洋中脊/大陆裂谷）：</strong>板块相互远离，产生正断层，地震浅源且震级较小（如东非大裂谷）。</p>
+                    <p><strong>平移边界（走滑断层）：</strong>板块水平错动，产生走滑型大地震，无火山（如美国圣安德烈斯断层）。</p>
+                </article>
+                <article class="edu-card full">
+                    <h4>3) 板块运动与全球地震分布</h4>
+                    <p><strong>环太平洋地震带（火环）：</strong>约 80% 浅源地震、90% 深源地震，集中了大多数强震。</p>
+                    <p><strong>地中海-喜马拉雅地震带：</strong>约 15% 地震，包括亚欧板块与印度洋板块、非洲板块碰撞带。</p>
+                    <p><strong>洋中脊地震带：</strong>分布在各大洋中脊，震级较低。</p>
+                </article>
+                <article class="edu-card full">
+                    <h4>4) 板块驱动力</h4>
+                    <p><strong>地幔对流：</strong>地幔物质热运动拖动上覆岩石圈。</p>
+                    <p><strong>板块拖曳力：</strong>俯冲板块下沉产生拉力。</p>
+                    <p><strong>洋脊推力：</strong>洋中脊隆起推动板块。</p>
+                    <p><strong>重力滑移：</strong>板块从洋脊向两侧滑移。</p>
+                    <p>以上机制共同作用，构成板块长期、连续的运动驱动，不需要复杂公式也能理解其基本物理图景。</p>
+                </article>
+            </div>
+            <h4 style="margin-top:20px;">总结：板块运动与地震的联系</h4>
+            <p>板块边界是地震最频繁的区域，特别是环太平洋地震带，因为俯冲、碰撞和走滑等相互作用持续积累并释放构造应力。</p>
+            <p>板内地震相对较少，但仍可能具有破坏性（如中国郯庐断裂带），说明地震风险不仅存在于板块边界，也与区域内部的历史断裂和应力传递有关。</p>
+            <p>构造应力的根源在于板块之间的相互作用，理解板块运动就是理解地震孕育与发生机制的基础。</p>
         </div>
         <div class="back-home-wrap"><button class="filter-btn filter-btn-reset back-home-btn" data-home-target="home-view">返回首页</button></div>
     </div>
