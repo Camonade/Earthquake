@@ -1101,6 +1101,54 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
+        .stress-gif-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stress-gif-item {
+            background: rgba(245, 249, 255, 0.88);
+            border: 1px solid rgba(144, 202, 249, 0.45);
+            border-left: 2px solid #42a5f5;
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: 0 6px 18px rgba(21, 101, 192, 0.08);
+        }
+
+        .no-card-style {
+            background: transparent !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            border: none !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+        }
+
+        .stress-gif-item h5 {
+            margin: 0 0 10px;
+            color: #1565c0;
+            font-size: 16px;
+        }
+
+        .stress-gif-item p {
+            margin: 10px 0 0;
+            color: #2f3d54;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .stress-gif-img {
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            margin: 0 auto;
+            border-radius: 8px;
+        }
+
         .emphasis {
             color: #d32f2f;
             font-weight: 600;
@@ -1804,6 +1852,7 @@
         @media (max-width: 768px) {
             .edu-card { grid-column: 1 / -1; }
             .plate-tectonics-grid { grid-template-columns: 1fr; }
+            .stress-gif-grid { grid-template-columns: 1fr; }
             .energy-row { grid-template-columns: 68px 1fr; }
             .energy-value { grid-column: 1 / -1; text-align: left; }
             .intensity-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -2293,6 +2342,29 @@
                         alt="地质营力与构造变形示意图"
                         loading="lazy"
                     >
+                    <div class="stress-gif-grid">
+                        <div class="stress-gif-item no-card-style">
+                            <h5>拉张破裂</h5>
+                            <img
+                                class="stress-gif-img"
+                                src="/videos/tensile_fracture.gif"
+                                alt="拉张破裂过程示意"
+                                loading="lazy"
+                            >
+                            <p>当岩石受到拉张应力时，垂直于张应力方向发生破裂，形成正断层。这种破裂方式常见于大陆裂谷、洋中脊等区域，地震震级一般较小。</p>
+                        </div>
+                        <div class="stress-gif-item no-card-style">
+                            <h5>剪切破裂</h5>
+                            <img
+                                class="stress-gif-img"
+                                src="/videos/shear_fracture.gif"
+                                alt="剪切破裂过程示意"
+                                loading="lazy"
+                            >
+                            <p>当岩石受到剪切应力时，沿与最大剪切应力方向一致的面发生破裂，形成走滑断层。这种破裂是浅源大地震的主要成因（如圣安德烈斯断层）。</p>
+                            <p>视频由AI生成，剪切破裂不应有沿受力方向的裂纹</p>
+                        </div>
+                    </div>
                     </div>
             </div>
         </div>

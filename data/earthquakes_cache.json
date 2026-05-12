@@ -1,14 +1,14 @@
 {
   "type": "FeatureCollection",
   "metadata": {
-    "generated": 1778514262000,
-    "url": "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2026-03-30&endtime=2026-03-30&minmagnitude=5&maxmagnitude=9&orderby=time&limit=2000",
+    "generated": 1778546109000,
+    "url": "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2026-03-30&endtime=2026-03-30&minmagnitude=5&orderby=time&limit=2000",
     "title": "USGS Earthquakes",
     "status": 200,
     "api": "2.4.0",
     "limit": 2000,
     "offset": 1,
-    "updatedAt": "2026-05-11T15:44:23.181Z",
+    "updatedAt": "2026-05-12T00:35:09.038Z",
     "source": "USGS realtime+cache merge"
   },
   "features": [

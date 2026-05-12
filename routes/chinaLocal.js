@@ -85,8 +85,22 @@ function parseTimeMs(value) {
   const s = String(value ?? '').trim();
   if (!s) return null;
   const normalized = s.includes('T') ? s : s.replace(' ', 'T');
-  const ms = Date.parse(normalized);
+  const hasTimezone = /(?:Z|[+-]\d{2}:\d{2})$/.test(normalized);
+  const withTimezone = hasTimezone ? normalized : `${normalized}+08:00`;
+  const ms = Date.parse(withTimezone);
   return Number.isFinite(ms) ? ms : null;
+}
+
+function isDateOnlyText(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(value || '').trim());
+}
+
+function addOneDayDateOnly(dateText) {
+  const ms = Date.parse(`${dateText}T00:00:00Z`);
+  if (!Number.isFinite(ms)) return dateText;
+  const d = new Date(ms);
+  d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10);
 }
 
 function ensureRequiredHeaders(index) {
@@ -190,8 +204,23 @@ function loadCsvToCache() {
 }
 
 function filterByQuery(features, query) {
-  const startMs = query.start ? Date.parse(`${query.start}T00:00:00+08:00`) : null;
-  const endMs = query.end ? Date.parse(`${query.end}T23:59:59+08:00`) : null;
+  const startText = String(query.start || '').trim();
+  const endText = String(query.end || '').trim();
+  const startMs = startText
+    ? isDateOnlyText(startText)
+      ? Date.parse(`${startText}T00:00:00+08:00`)
+      : Date.parse(startText)
+    : null;
+  let endExclusiveMs = null;
+  if (endText) {
+    // Treat end as exclusive next-day 00:00 in UTC+8 to cover the whole selected end date.
+    if (isDateOnlyText(endText)) {
+      const endNextDay = addOneDayDateOnly(endText);
+      endExclusiveMs = Date.parse(`${endNextDay}T00:00:00+08:00`);
+    } else {
+      endExclusiveMs = Date.parse(endText);
+    }
+  }
   const minMag = Number.isFinite(Number(query.minMag)) ? Number(query.minMag) : null;
   const maxMag = Number.isFinite(Number(query.maxMag)) ? Number(query.maxMag) : null;
 
@@ -200,7 +229,7 @@ function filterByQuery(features, query) {
     const m = Number(feature?.properties?.mag);
     if (!Number.isFinite(t) || !Number.isFinite(m)) return false;
     if (Number.isFinite(startMs) && t < startMs) return false;
-    if (Number.isFinite(endMs) && t > endMs) return false;
+    if (Number.isFinite(endExclusiveMs) && t >= endExclusiveMs) return false;
     if (minMag !== null && m < minMag) return false;
     if (maxMag !== null && m > maxMag) return false;
     return true;

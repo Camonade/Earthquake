@@ -34,6 +34,39 @@ function toNumber(value, fallback) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function isDateOnlyText(value) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(value || '').trim());
+}
+
+function addOneDayDateOnly(dateText) {
+  const ms = Date.parse(`${dateText}T00:00:00Z`);
+  if (!Number.isFinite(ms)) return dateText;
+  const d = new Date(ms);
+  d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
+function toBeijingDayStartUtcIso(dateText) {
+  return new Date(Date.parse(`${dateText}T00:00:00+08:00`)).toISOString();
+}
+
+function toBeijingNextDayStartUtcIso(dateText) {
+  const nextDay = addOneDayDateOnly(dateText);
+  return new Date(Date.parse(`${nextDay}T00:00:00+08:00`)).toISOString();
+}
+
+function normalizeUsgsDateRange(start, end) {
+  if (!isDateOnlyText(start) || !isDateOnlyText(end)) {
+    return { starttime: start, endtime: end };
+  }
+  // Treat client date as Beijing local date, then convert to UTC.
+  // Use half-open interval [start, endNextDay) so same-day query covers full day.
+  return {
+    starttime: toBeijingDayStartUtcIso(start),
+    endtime: toBeijingNextDayStartUtcIso(end)
+  };
+}
+
 function getFetchErrorMessage(error) {
   const base = error?.message || String(error);
   const causeCode = error?.cause?.code || '';
@@ -43,9 +76,10 @@ function getFetchErrorMessage(error) {
 
 function buildUsgsUrl({ start, end, minMag, maxMag, orderBy = 'time', limit }) {
   const usgsUrl = new URL('https://earthquake.usgs.gov/fdsnws/event/1/query');
+  const { starttime, endtime } = normalizeUsgsDateRange(start, end);
   usgsUrl.searchParams.set('format', 'geojson');
-  usgsUrl.searchParams.set('starttime', start);
-  usgsUrl.searchParams.set('endtime', end);
+  usgsUrl.searchParams.set('starttime', starttime);
+  usgsUrl.searchParams.set('endtime', endtime);
   usgsUrl.searchParams.set('minmagnitude', String(Math.max(0, minMag)));
   if (Number.isFinite(maxMag)) {
     usgsUrl.searchParams.set('maxmagnitude', String(Math.max(0, maxMag)));
@@ -148,15 +182,16 @@ function filterFeatures(features, query = {}) {
   const limitRaw = toNumber(query.limit, 100);
   const limit = Math.max(1, Math.min(2000, Math.floor(limitRaw)));
 
-  const startMs = Date.parse(`${start}T00:00:00.000Z`);
-  const endMs = Date.parse(`${end}T23:59:59.999Z`);
+  // Align cache fallback filtering with Beijing day boundaries [start, endNextDay).
+  const startMs = Date.parse(`${start}T00:00:00+08:00`);
+  const endExclusiveMs = Date.parse(`${addOneDayDateOnly(end)}T00:00:00+08:00`);
 
   return (features || [])
     .filter((feature) => {
       const time = Number(feature?.properties?.time);
       const mag = Number(feature?.properties?.mag);
       if (!Number.isFinite(time) || !Number.isFinite(mag)) return false;
-      if (time < startMs || time > endMs) return false;
+      if (time < startMs || time >= endExclusiveMs) return false;
       if (mag < minMag) return false;
       if (Number.isFinite(maxMag) && mag > maxMag) return false;
       return true;
