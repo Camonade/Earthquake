@@ -333,9 +333,17 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             return `${year}-${month}-${day}`;
         }
 
+        function normalizeDateInput(value) {
+            const text = String(value || '').trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+            const parsed = new Date(text);
+            if (Number.isNaN(parsed.getTime())) return '';
+            return formatDate(parsed);
+        }
+
         function buildEarthquakeApiUrl(queryStartDate, queryEndDate, queryMinMag, queryMaxMag, queryLimit = 2000, queryTimezone = '') {
-            const formattedStart = formatDate(new Date(queryStartDate));
-            const formattedEnd = formatDate(new Date(queryEndDate));
+            const formattedStart = normalizeDateInput(queryStartDate);
+            const formattedEnd = normalizeDateInput(queryEndDate);
             const minMag = Math.max(0, queryMinMag || 5.5); // 最小值允许为 0
             const maxMag = Number.isFinite(queryMaxMag) ? queryMaxMag : '';
             const limit = Math.max(1, Math.min(2000, Math.floor(Number(queryLimit) || 100)));
@@ -351,8 +359,8 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
         }
 
         function buildChinaLocalApiUrl(queryStartDate, queryEndDate, queryMinMag, queryMaxMag) {
-            const formattedStart = formatDate(new Date(queryStartDate));
-            const formattedEnd = formatDate(new Date(queryEndDate));
+            const formattedStart = normalizeDateInput(queryStartDate);
+            const formattedEnd = normalizeDateInput(queryEndDate);
             const minMag = Math.max(0, queryMinMag || 4);
             const maxMag = Number.isFinite(queryMaxMag) ? queryMaxMag : '';
             const params = new URLSearchParams({
@@ -514,10 +522,13 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
             const endEl = document.getElementById('filterEndDate');
             const minEl = document.getElementById('filterMinMag');
             const maxEl = document.getElementById('filterMaxMag');
+            const domesticOnlyToggle = document.getElementById('domesticOnlyToggle');
             if (startEl) startEl.value = dateText;
             if (endEl) endEl.value = dateText;
             if (minEl) minEl.value = String(CALENDAR_CLICK_MIN_MAG);
             if (maxEl) maxEl.value = '';
+            // Calendar stats are global M5+; keep click-through query source consistent.
+            if (domesticOnlyToggle) domesticOnlyToggle.checked = false;
             lastFilterParams = {
                 startDate: dateText,
                 endDate: dateText,

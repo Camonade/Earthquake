@@ -95,14 +95,6 @@ function isDateOnlyText(value) {
   return /^\d{4}-\d{2}-\d{2}$/.test(String(value || '').trim());
 }
 
-function addOneDayDateOnly(dateText) {
-  const ms = Date.parse(`${dateText}T00:00:00Z`);
-  if (!Number.isFinite(ms)) return dateText;
-  const d = new Date(ms);
-  d.setUTCDate(d.getUTCDate() + 1);
-  return d.toISOString().slice(0, 10);
-}
-
 function ensureRequiredHeaders(index) {
   const required = ['time', 'latitude', 'longitude', 'magnitude'];
   return required.every((key) => Number.isInteger(index[key]));
@@ -211,14 +203,12 @@ function filterByQuery(features, query) {
       ? Date.parse(`${startText}T00:00:00+08:00`)
       : Date.parse(startText)
     : null;
-  let endExclusiveMs = null;
+  let endMs = null;
   if (endText) {
-    // Treat end as exclusive next-day 00:00 in UTC+8 to cover the whole selected end date.
     if (isDateOnlyText(endText)) {
-      const endNextDay = addOneDayDateOnly(endText);
-      endExclusiveMs = Date.parse(`${endNextDay}T00:00:00+08:00`);
+      endMs = Date.parse(`${endText}T23:59:59.999+08:00`);
     } else {
-      endExclusiveMs = Date.parse(endText);
+      endMs = Date.parse(endText);
     }
   }
   const minMag = Number.isFinite(Number(query.minMag)) ? Number(query.minMag) : null;
@@ -229,7 +219,7 @@ function filterByQuery(features, query) {
     const m = Number(feature?.properties?.mag);
     if (!Number.isFinite(t) || !Number.isFinite(m)) return false;
     if (Number.isFinite(startMs) && t < startMs) return false;
-    if (Number.isFinite(endExclusiveMs) && t >= endExclusiveMs) return false;
+    if (Number.isFinite(endMs) && t > endMs) return false;
     if (minMag !== null && m < minMag) return false;
     if (maxMag !== null && m > maxMag) return false;
     return true;
